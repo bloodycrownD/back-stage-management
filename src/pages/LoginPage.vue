@@ -24,9 +24,11 @@ import {reactive, ref} from 'vue'
 import cookieJs from 'js-cookie'
 import {useRouter} from "vue-router";
 import {getPermission} from "@/api";
-import { ElMessage } from 'element-plus'
+import {ElMessage} from 'element-plus'
 import 'element-plus/theme-chalk/index.css'
+import store from '../store'
 
+const myStore = store()
 const router = useRouter()
 const form = ref(null)
 const formData = reactive({
@@ -34,14 +36,17 @@ const formData = reactive({
   password: '',
 })
 
+
+
 function login() {
   form.value.validate(async (val) => {
     if (val) {
 
       const data = await getPermission(formData)
-      console.log(data)
       if (data.data.code === 20000) {
+        myStore.menuData = data.data.data.menu
         cookieJs.set('token', data.data.data.token)
+        myStore.addRoute(router);
         await router.push({path: '/home'})
       } else {
         ElMessage('密码或账号输入错误')
